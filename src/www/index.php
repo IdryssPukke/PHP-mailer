@@ -82,7 +82,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Sprawdź, czy treść wiadomości jest dostarczona przez formularz, a jeśli nie to dostarczamy domyślną treść wiadomości
     $emailMessage = isset($_POST["message"]) && !empty($_POST["message"]) ? $_POST["message"] : "Domyślna treść wiadomości do użytkownika";
-    echo "emailmessage: ", $emailMessage;
     // Nawiązywanie połączenia z bazą danych PostgreSQL
     $conn = connectToDatabase();
 
@@ -91,8 +90,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Wysyłamy wiadomość do każdego użytkownika
     foreach ($users as $user) {
-        $recipient = $user['email'];
-        sendEmail($recipient, $emailSubject, $emailMessage);
+        $to = $user["email"];
+        $fullName = $user["first_name"] . " " . $user["last_name"];
+
+        // Możesz dostosować treść wiadomości z użyciem zmiennych
+        $personalizedMessage = "Cześć $fullName,\n\n$emailMessage ";
+
+        // Wysyłamy e-mail
+        sendEmail($to, $emailSubject, $personalizedMessage);
     }
 
     // Zamykamy połączenie z bazą danych
