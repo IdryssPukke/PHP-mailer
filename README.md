@@ -5,7 +5,8 @@
 Projekt PHP-mailer służy do wysyłania emaili do użytkowników zdefiniowanych w bazie danych w połączeniu z przypisanymi do nich kategoriami.
 Dokładniejsze specyfikacje na temat projektu:
 1. Jeden użytkownik może być przypisany do wielu kategorii.
-2. Treść wiadomości może być podana w polu formularza lub być predefiniowana w kodzie skryptu
+2. Treść wiadomości może być podana w polu formularza lub być predefiniowana w kodzie skryptu.
+3. Możliwe jest dodawane zmiennych do tekstu takich jak {imie} lub {nazwisko}, by wiadomość była bardziej spersonalizowana.
 
 ### Kroki instalacji
 1. Sklonuj repozytorium na swój lokalny komputer:
@@ -15,6 +16,8 @@ Dokładniejsze specyfikacje na temat projektu:
 
 2. Wypełnij bazę danych przykładowymi danymi
 3. Wykonaj własny setup php i metody mail(), pozwoli to na wysyłanie maili
+4. Całość aplikacji jest dostępna pod adresem:
+    http://localhost:8000/
 
 
 ### Struktura bazy danych

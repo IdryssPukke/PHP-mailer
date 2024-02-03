@@ -1,5 +1,5 @@
 <?php
-// Połączenie z bazą danych
+// Funkcja, która odpowiada za połączenie z bazą danych Posgtres
 function connectToDatabase() {
     $host = "postgres";
     $port = 5432;
@@ -17,7 +17,8 @@ function connectToDatabase() {
     }
 }
 
-// Funkcja pobierająca kategorie z bazy danych
+// Funkcja pobierająca kategorie z bazy danych, jako argument przekazywane jest połączenie z bazą danych, przy pomocy, którego wykonywane jest query. 
+// Zwracane jest array ze wszystkimi kategoriami 
 function getCategories($conn) {
     $query = "SELECT * FROM categories";
     $result = $conn->query($query);
@@ -36,7 +37,9 @@ function getCategories($conn) {
 }
 
 
-// Funkcja pobierająca użytkowników dla danej kategorii
+// Funkcja pobierająca użytkowników dla danej kategorii,
+// Wproawdzane są dwa argumenty, połączenie z bazą danych oraz id kategorii, której szukamy
+// Zwracane jest array 
 function getUsersByCategory($conn, $categoryId) {
     $query = "SELECT users.* FROM users
               JOIN user_category ON users.id = user_category.user_id
@@ -51,20 +54,19 @@ function getUsersByCategory($conn, $categoryId) {
     if (!$result) {
         die("Błąd zapytania: " . $conn->errorInfo()[2]);
     }
-
     return $result;
 }
 
-// Funkcja wysyłająca e-mail
+// Funkcja wysyłająca e-mail, korzysta z funkcji mail()
+// Dla uproszczenia działania i testowania wynik jest wyświetlany na ekranie zamiast bycia wysyłanym
+// Funkcja przyjmuje 3 argumenty: adresat, temat oraz wiadomość
 function sendEmail($recipient, $subject, $message) {
     
-    // Dla uproszczenia wyświetlam tutaj tylko dane, poniżej przedstawiona jest pełna implementacja funkcji
     echo "Wysłano wiadomość do: $recipient<br>";
     echo "Temat: $subject<br>";
     echo "Treść wiadomości: $message<br>";
     echo "<hr>";
 
-    // Wysłanie e-maila
     // if (mail($recipient, $subject, $message)) {
     //     echo "Wiadomość została wysłana do: $recipient<br>";
     //     echo "Temat: $subject<br>";
@@ -76,33 +78,28 @@ function sendEmail($recipient, $subject, $message) {
 }
 
 // Sprawdzamy, czy formularz został przesłany
+// Element kodu odpowiadający za logikę skryptu
+// Sprawdzamy, czy formularz został przesłany, i jeśli tak to odpowiednio wykonujemy wszystkie polecenia. 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
     $selectedCategoryId = $_POST["category"];
     $emailSubject = $_POST["subject"];
 
-    // Sprawdź, czy treść wiadomości jest dostarczona przez formularz, a jeśli nie to dostarczamy domyślną treść wiadomości
     $emailMessage = isset($_POST["message"]) && !empty($_POST["message"]) ? $_POST["message"] : "Domyślna treść wiadomości do użytkownika";
-    // Nawiązywanie połączenia z bazą danych PostgreSQL
     $conn = connectToDatabase();
-
-    // Pobieramy użytkowników dla danej kategorii
     $users = getUsersByCategory($conn, $selectedCategoryId);
 
-    // Wysyłamy wiadomość do każdego użytkownika
     foreach ($users as $user) {
         $to = $user["email"];
         $fullName = $user["first_name"] . " " . $user["last_name"];
-
-        // Możesz dostosować treść wiadomości z użyciem zmiennych
         $personalizedMessage = "Cześć $fullName,\n\n$emailMessage ";
 
-        // Wysyłamy e-mail
+        $personalizedMessage = str_replace('{imie}', $user['first_name'], $personalizedMessage);
+        $personalizedMessage = str_replace('{nazwisko}', $user['last_name'], $personalizedMessage);
+
         sendEmail($to, $emailSubject, $personalizedMessage);
     }
-
-    // Zamykamy połączenie z bazą danych
     $conn = null;
-
     echo "E-maile zostały wysłane do użytkowników w wybranej kategorii.";
 }
 ?>
